@@ -13,22 +13,49 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 
 var requestHandler = function(request, response) {
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  var statusCode = 200;
   var headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'application/json';
 
-  headers['Content-Type'] = 'text/plain';
-  response.writeHead(statusCode, headers);
-  response.end('Hello, ' + request.url.slice(1));
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+
+  var handler;
+  if (request.method === 'GET') {
+    handler = getRequest;
+  } else if (request.method === 'POST') {
+    handler = postRequest;
+  } else if (request.method === 'OPTIONS') {
+    handler = optionsRequest;
+  }
+  var result = handler(request, response) || {statusCode: 404, text: ''};
+
+  response.writeHead(result.statusCode, headers);
+  response.end(result.text);
+
 };
 
+
+var postRequest = function(request, response) {
+  return {
+    statusCode: 201,
+    text: ''
+  };
+};
+var getRequest = function(request, response) {
+  responseText = JSON.stringify({results: [1, 2, 3, 4, 5], is: 'cool'});  
+  return {
+    statusCode: 200,
+    text: responseText
+  };
+
+};
+var optionsRequest = function(request, response) {
+};
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
-console.log('request-handler.js', requestHandler);
 module.exports = requestHandler;
 
   // Request and Response come from node's http module.
