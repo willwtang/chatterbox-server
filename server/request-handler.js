@@ -13,6 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 var url = require('url');
 var messages = [];
+var currentID = 0;
 
 var requestHandler = function(request, response) {
 
@@ -39,11 +40,15 @@ var postRequest = function(request, response) {
     request.on('data', chunk => body.push(chunk.toString()));
     request.on('end', () => {
       body = body.join('');
-      messages.push(JSON.parse(body));
+      body = JSON.parse(body);
+      body.objectId = currentID++;
+      messages.unshift(body);
 
       // Response Actions;
-      response.writeHead(201);
-      response.end();
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(201, headers);
+      response.end('{}');
     });
   }
 };
