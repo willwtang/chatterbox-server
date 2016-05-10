@@ -34,15 +34,18 @@ var requestHandler = function(request, response) {
 
 var postRequest = function(request, response) {
   var body = [];
-  request.on('data', chunk => body.push(chunk))
-    .on('end', () => {
-      body = Buffer.concat(body).toString();
+  var endpoint = url.parse(request.url).pathname;
+  if (endpoint === '/classes/messages') {
+    request.on('data', chunk => body.push(chunk.toString()));
+    request.on('end', () => {
+      body = body.join('');
       messages.push(JSON.parse(body));
 
       // Response Actions;
       response.writeHead(201);
       response.end();
     });
+  }
 };
 
 var getRequest = function(request, response) {
@@ -60,6 +63,9 @@ var getRequest = function(request, response) {
   response.end();
 };
 var optionsRequest = function(request, response) {
+  var headers = defaultCorsHeaders;
+  response.writeHead(200, headers);
+  response.end();
 };
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
@@ -67,7 +73,7 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
-module.exports = requestHandler;
+module.exports.requestHandler = requestHandler;
 
   // Request and Response come from node's http module.
   //

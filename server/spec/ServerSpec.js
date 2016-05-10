@@ -2,6 +2,7 @@ var handler = require('../request-handler');
 var expect = require('chai').expect;
 var stubs = require('./Stubs');
 
+
 // Conditional async testing, akin to Jasmine's waitsFor()
 // Will wait for test to be truthy before executing callback
 var waitForThen = function (test, cb) {
@@ -55,8 +56,7 @@ describe('Node Server Request Listener Function', function() {
     expect(parsedBody.results).to.be.an('array');
     expect(res._ended).to.equal(true);
   });
-
-  it('Should accept posts to /classes/room', function() {
+  it('Should accept posts to /classes/messages', function() {  // used to say /room
     var stubMsg = {
       username: 'Jono',
       message: 'Do my bidding!'
