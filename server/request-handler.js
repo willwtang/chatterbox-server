@@ -12,8 +12,8 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var url = require('url');
+var express = require('express');
 var fs = require('fs');
-var messages = [];
 var currentID = 0;
 
 var requestHandler = function(request, response) {
@@ -43,7 +43,6 @@ var postRequest = function(request, response) {
       body = body.join('');
       body = JSON.parse(body);
       body.objectId = currentID++;
-      messages.unshift(body);
       fs.appendFile('message.txt', JSON.stringify(body) + ',', 
         (err) => {
           if (err) {
@@ -52,8 +51,6 @@ var postRequest = function(request, response) {
             response.end('');
             return;
           }
-          console.log('data appended');
-
           // Response Actions
           var headers = defaultCorsHeaders;
           headers['Content-Type'] = 'application/json';
@@ -78,7 +75,6 @@ var getRequest = function(request, response) {
       }
       var messages = '[' + data.slice(0, -1) + ']';
       responseText = '{"results":' + messages + '}';
-      console.log(responseText);
       // Response Action
       headers = defaultCorsHeaders;
       headers['Content-Type'] = 'application/json';
