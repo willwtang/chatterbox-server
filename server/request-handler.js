@@ -44,12 +44,23 @@ var postRequest = function(request, response) {
       body = JSON.parse(body);
       body.objectId = currentID++;
       messages.unshift(body);
+      fs.appendFile('message.txt', JSON.stringify(body) + ',', 
+        (err) => {
+          if (err) {
+            console.error(err);
+            response.writeHead(401, headers);
+            response.end('');
+            return;
+          }
+          console.log('data appended');
 
-      // Response Actions;
-      var headers = defaultCorsHeaders;
-      headers['Content-Type'] = 'application/json';
-      response.writeHead(201, headers);
-      response.end('{}');
+          // Response Actions
+          var headers = defaultCorsHeaders;
+          headers['Content-Type'] = 'application/json';
+          response.writeHead(201, headers);
+          response.end('{}');   
+        });
+
     });
   }
 };
@@ -58,12 +69,23 @@ var getRequest = function(request, response) {
   var responseText, headers, extension;
   var endpoint = url.parse(request.url).pathname;
   if (endpoint === '/classes/messages') {
-    responseText = JSON.stringify({results: messages});
-    // Response Action
-    headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'application/json';
-    response.writeHead(200, headers);
-    response.end(responseText);
+    fs.readFile('message.txt', 'utf-8', function(err, data) {
+      if (err) {
+        response.writeHead(404);
+        response.end();
+        console.error(err);
+        return;     
+      }
+      var messages = '[' + data.slice(0, -1) + ']';
+      responseText = '{"results":' + messages + '}';
+      console.log(responseText);
+      // Response Action
+      headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(200, headers);
+      response.end(responseText);
+    });
+
     return;
   } else {
     // endpoint = /images/spiffygif_46x46.gif
@@ -71,11 +93,15 @@ var getRequest = function(request, response) {
     // Open File 
     // Get Contents
     // Set Response Text to Contents
+    if (endpoint === '/') {
+      endpoint = '/index.html';
+    }
     fs.readFile('../client' + endpoint, 'binary', function (err, data) {
       if (err) {
         response.writeHead(404);
         response.end();
-        return console.log(err);
+        console.error(err);
+        return;
       }
       responseText = data;
 
