@@ -29,7 +29,7 @@ var app = {
     app.fetch(false);
 
     // Poll for new messages
-    //setInterval(app.fetch, 1000);
+    setInterval(app.fetch, 3000);
   },
 
   send: function(data) {

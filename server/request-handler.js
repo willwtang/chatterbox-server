@@ -12,9 +12,9 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var messages = [];
+
 var requestHandler = function(request, response) {
-  var headers = defaultCorsHeaders;
-  headers['Content-Type'] = 'application/json';
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
@@ -28,25 +28,28 @@ var requestHandler = function(request, response) {
   }
   var result = handler(request, response) || {statusCode: 404, text: ''};
 
-  response.writeHead(result.statusCode, headers);
-  response.end(result.text);
 
 };
 
 
 var postRequest = function(request, response) {
-  return {
-    statusCode: 201,
-    text: ''
-  };
+  var body = [];
+  request.on('data', chunk => {body.push(chunk);})
+    .on('end', () => {
+      body = Buffer.concat(body).toString();
+      messages.push(JSON.parse(body));
+      console.log(messages);
+    });
 };
+
 var getRequest = function(request, response) {
   responseText = JSON.stringify({results: [1, 2, 3, 4, 5], is: 'cool'});  
-  return {
-    statusCode: 200,
-    text: responseText
-  };
 
+  // Response Action
+  var headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'application/json';
+  response.writeHead(200, headers);
+  response.end(responseText);
 };
 var optionsRequest = function(request, response) {
 };

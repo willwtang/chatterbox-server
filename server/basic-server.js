@@ -1,7 +1,6 @@
 /* Import node's http module: */
 
 var handleRequest = require('./request-handler');
-console.log(handleRequest);
 
 var http = require('http');
 var port = 3000;
