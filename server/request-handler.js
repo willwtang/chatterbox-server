@@ -12,6 +12,7 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var url = require('url');
+var fs = require('fs');
 var messages = [];
 var currentID = 0;
 
@@ -54,14 +55,42 @@ var postRequest = function(request, response) {
 };
 
 var getRequest = function(request, response) {
+  var responseText, headers, extension;
   var endpoint = url.parse(request.url).pathname;
   if (endpoint === '/classes/messages') {
     responseText = JSON.stringify({results: messages});
     // Response Action
-    var headers = defaultCorsHeaders;
+    headers = defaultCorsHeaders;
     headers['Content-Type'] = 'application/json';
     response.writeHead(200, headers);
     response.end(responseText);
+    return;
+  } else {
+    // endpoint = /images/spiffygif_46x46.gif
+    // read that file in /clients directory
+    // Open File 
+    // Get Contents
+    // Set Response Text to Contents
+    fs.readFile('../client' + endpoint, 'binary', function (err, data) {
+      if (err) {
+        response.writeHead(404);
+        response.end();
+        return console.log(err);
+      }
+      responseText = data;
+
+      extension = endpoint.split('.').pop();
+      extensions = {
+        html: 'text/html',
+        js: 'text/javascript',
+        gif: 'image/gif',
+        css: 'text/css'
+      };
+      
+      headers = {'Content-Type': extensions[extension]};
+      response.writeHead(200, headers);
+      response.end(responseText, 'binary'); 
+    });
     return;
   }
   response.writeHead(404);
