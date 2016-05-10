@@ -34,17 +34,19 @@ var requestHandler = function(request, response) {
 
 var postRequest = function(request, response) {
   var body = [];
-  request.on('data', chunk => {body.push(chunk);})
+  request.on('data', chunk => body.push(chunk))
     .on('end', () => {
       body = Buffer.concat(body).toString();
       messages.push(JSON.parse(body));
-      console.log(messages);
+
+      // Response Actions;
+      response.writeHead(201);
+      response.end();
     });
 };
 
 var getRequest = function(request, response) {
-  responseText = JSON.stringify({results: [1, 2, 3, 4, 5], is: 'cool'});  
-
+  responseText = JSON.stringify({results: messages});
   // Response Action
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'application/json';
