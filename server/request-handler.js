@@ -11,7 +11,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-
+var url = require('url');
 var messages = [];
 
 var requestHandler = function(request, response) {
@@ -46,12 +46,18 @@ var postRequest = function(request, response) {
 };
 
 var getRequest = function(request, response) {
-  responseText = JSON.stringify({results: messages});
-  // Response Action
-  var headers = defaultCorsHeaders;
-  headers['Content-Type'] = 'application/json';
-  response.writeHead(200, headers);
-  response.end(responseText);
+  var endpoint = url.parse(request.url).pathname;
+  if (endpoint === '/classes/messages') {
+    responseText = JSON.stringify({results: messages});
+    // Response Action
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'application/json';
+    response.writeHead(200, headers);
+    response.end(responseText);
+    return;
+  }
+  response.writeHead(404);
+  response.end();
 };
 var optionsRequest = function(request, response) {
 };
